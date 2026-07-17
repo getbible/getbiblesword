@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a reproducible extraction or contract defect
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: getBibleSword version
+    validations:
+      required: true
+  - type: input
+    id: sword
+    attributes:
+      label: CrossWire SWORD version
+    validations:
+      required: true
+  - type: dropdown
+    id: module_type
+    attributes:
+      label: Module family
+      options:
+        - Bible
+        - Commentary
+        - Dictionary or lexicon
+        - General book
+        - Devotional
+        - Resource or media
+        - Unknown
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Do not attach content you are not authorized to share.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true

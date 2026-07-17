@@ -1,0 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+#pragma once
+
+#define GETBIBLESWORD_VERSION "@PROJECT_VERSION@"
+#define GETBIBLESWORD_CONTRACT "getbiblesword.ndjson/v1"

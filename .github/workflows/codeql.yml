@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: GPL-2.0-only
+name: CodeQL
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  schedule:
+    - cron: '17 3 * * 1'
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: github/codeql-action/init@ddf5ce7296213f5548c91e2dd19df2d77d2b2d66 # v3
+        with:
+          languages: c-cpp
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            autoconf automake build-essential cmake curl libbz2-dev \
+            libcurl4-openssl-dev libicu-dev liblzma-dev libtool ninja-build \
+            pkg-config zlib1g-dev
+      - name: Build pinned CrossWire SWORD
+        run: ./scripts/build-sword.sh "$PWD/build/dependencies/sword"
+      - name: Build getBibleSword
+        env:
+          PKG_CONFIG_PATH: ${{ github.workspace }}/build/dependencies/sword/lib/pkgconfig
+        run: |
+          cmake --preset dev
+          cmake --build --preset dev --parallel
+      - uses: github/codeql-action/analyze@ddf5ce7296213f5548c91e2dd19df2d77d2b2d66 # v3

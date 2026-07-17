@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getbible.net/schema/getbiblesword/ndjson/v1/contract.schema.json",
+  "title": "getBibleSword NDJSON v1 record",
+  "oneOf": [
+    { "$ref": "#/$defs/header" },
+    { "$ref": "#/$defs/module" },
+    { "$ref": "#/$defs/configSource" },
+    { "$ref": "#/$defs/configEntry" },
+    { "$ref": "#/$defs/entry" },
+    { "$ref": "#/$defs/artifactBegin" },
+    { "$ref": "#/$defs/artifactChunk" },
+    { "$ref": "#/$defs/artifactEnd" },
+    { "$ref": "#/$defs/diagnostic" },
+    { "$ref": "#/$defs/footer" }
+  ],
+  "$defs": {
+    "baseRecord": {
+      "type": "object",
+      "required": ["sequence", "type"],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 0 },
+        "type": { "type": "string" }
+      }
+    },
+    "byteValue": {
+      "type": "object",
+      "required": ["base64", "encoding", "sha256", "size"],
+      "properties": {
+        "base64": { "type": "string", "contentEncoding": "base64" },
+        "encoding": { "const": "base64" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "size": { "type": "integer", "minimum": 0 },
+        "utf8": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "header": {
+      "allOf": [
+        { "$ref": "#/$defs/baseRecord" },
+        {
+          "required": ["command", "contract", "contract_version", "producer", "producer_version", "sword_version"],
+          "properties": {
+            "type": { "const": "header" },
+            "contract": { "const": "getbiblesword.ndjson/v1" },
+            "contract_version": { "const": 1 }
+          }
+        }
+      ]
+    },
+    "module": {
+      "allOf": [
+        { "$ref": "#/$defs/baseRecord" },
+        {
+          "required": ["classification", "driver", "name", "sword_type"],
+          "properties": { "type": { "const": "module" } }
+        }
+      ]
+    },
+    "configSource": {
+      "allOf": [
+        { "$ref": "#/$defs/baseRecord" },
+        {
+          "required": ["ordinal", "path", "raw"],
+          "properties": {
+            "type": { "const": "config_source" },
+            "path": { "$ref": "#/$defs/byteValue" },
+            "raw": { "$ref": "#/$defs/byteValue" }
+          }
+        }
+      ]
+    },
+    "configEntry": {
+      "allOf": [
+        { "$ref": "#/$defs/baseRecord" },
+        {
+          "required": ["name", "ordinal", "value"],
+          "properties": { "type": { "const": "config_entry" } }
+        }
+      ]
+    },
+    "entry": {
+      "allOf": [
+        { "$ref": "#/$defs/baseRecord" },
+        {
+          "required": ["annotation_segments", "key", "official_attributes", "ordinal", "raw", "scope"],
+          "properties": {
+            "type": { "const": "entry" },
+            "key": { "$ref": "#/$defs/byteValue" },
+            "raw": { "$ref": "#/$defs/byteValue" }
+          }
+        }
+      ]
+    },
+    "artifactBegin": {
+      "allOf": [
+        { "$ref": "#/$defs/baseRecord" },
+        {
+          "required": ["artifact_id", "file_type", "mode", "path", "role"],
+          "properties": { "type": { "const": "artifact_begin" } }
+        }
+      ]
+    },
+    "artifactChunk": {
+      "allOf": [
+        { "$ref": "#/$defs/baseRecord" },
+        {
+          "required": ["artifact_id", "data", "index"],
+          "properties": {
+            "type": { "const": "artifact_chunk" },
+            "data": { "$ref": "#/$defs/byteValue" }
+          }
+        }
+      ]
+    },
+    "artifactEnd": {
+      "allOf": [
+        { "$ref": "#/$defs/baseRecord" },
+        {
+          "required": ["artifact_id", "sha256", "size"],
+          "properties": { "type": { "const": "artifact_end" } }
+        }
+      ]
+    },
+    "diagnostic": {
+      "allOf": [
+        { "$ref": "#/$defs/baseRecord" },
+        {
+          "required": ["code", "message", "severity"],
+          "properties": {
+            "type": { "const": "diagnostic" },
+            "severity": { "enum": ["info", "warning", "error"] }
+          }
+        }
+      ]
+    },
+    "footer": {
+      "allOf": [
+        { "$ref": "#/$defs/baseRecord" },
+        {
+          "required": ["counts", "stream_sha256", "success"],
+          "properties": {
+            "type": { "const": "footer" },
+            "stream_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+            "success": { "type": "boolean" }
+          }
+        }
+      ]
+    }
+  }
+}

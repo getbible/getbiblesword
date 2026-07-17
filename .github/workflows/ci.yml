@@ -1,0 +1,72 @@
+# SPDX-License-Identifier: GPL-2.0-only
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.compiler }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+    env:
+      CC: ${{ matrix.compiler == 'gcc' && 'gcc' || 'clang' }}
+      CXX: ${{ matrix.compiler == 'gcc' && 'g++' || 'clang++' }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            autoconf automake build-essential clang cmake curl jq libbz2-dev \
+            libcurl4-openssl-dev libicu-dev liblzma-dev libtool ninja-build \
+            pkg-config zlib1g-dev
+      - name: Build pinned CrossWire SWORD
+        run: ./scripts/build-sword.sh "$PWD/build/dependencies/sword"
+      - name: Configure
+        env:
+          PKG_CONFIG_PATH: ${{ github.workspace }}/build/dependencies/sword/lib/pkgconfig
+        run: cmake --preset dev
+      - name: Build
+        run: cmake --build --preset dev --parallel
+      - name: Test
+        run: ctest --preset dev
+      - name: Verify deterministic empty-root listing
+        run: |
+          mkdir -p build/empty-sword/mods.d
+          build/dev/getbiblesword list --sword-path build/empty-sword > build/first.ndjson
+          build/dev/getbiblesword list --sword-path build/empty-sword > build/second.ndjson
+          cmp build/first.ndjson build/second.ndjson
+      - name: Repository checks
+        run: ./scripts/check.sh
+
+  sanitizers:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            autoconf automake build-essential cmake curl libbz2-dev \
+            libcurl4-openssl-dev libicu-dev liblzma-dev libtool ninja-build \
+            pkg-config zlib1g-dev
+      - name: Build pinned CrossWire SWORD
+        run: ./scripts/build-sword.sh "$PWD/build/dependencies/sword"
+      - name: Configure and test with sanitizers
+        env:
+          PKG_CONFIG_PATH: ${{ github.workspace }}/build/dependencies/sword/lib/pkgconfig
+          ASAN_OPTIONS: detect_leaks=1:strict_string_checks=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: |
+          cmake --preset sanitizers
+          cmake --build --preset sanitizers --parallel
+          ctest --preset sanitizers
