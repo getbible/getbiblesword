@@ -57,7 +57,9 @@ Each logical entry contains:
 
 - `ordinal`: traversal order;
 - `key`: exact official key text bytes;
-- `scope`: engine type and available canonical scope data;
+- `scope`: engine type and available canonical scope data, including the index
+  reported by the active `SWKey` (rather than a driver's optional module-level
+  index cache);
 - `raw`: exact bytes from `SWModule::getRawEntryBuf()`;
 - `rendered_default`: result of `SWModule::renderText()` with the module's default
   manager filters and no user option overrides;

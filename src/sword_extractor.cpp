@@ -437,7 +437,7 @@ std::string scope_json(sword::SWModule& module) {
     auto* verse_key = SWDYNAMIC_CAST(VerseKey, key);
     if (verse_key == nullptr) {
         return json_object({
-            {"index", std::to_string(module.getIndex())},
+            {"index", std::to_string(key->getIndex())},
             {"type", "\"sword_key\""}
         });
     }
@@ -518,7 +518,11 @@ bool emit_entries(
     long previous_index = std::numeric_limits<long>::min();
     while (true) {
         const auto key = safe_c_string(module.getKeyText());
-        const auto index = module.getIndex();
+        // SWModule::getIndex() reads the module's entryIndex cache. Some official
+        // drivers, including SWGenBook, do not initialize that cache. The key is
+        // the authoritative traversal object and supplies the stable index for
+        // every key type.
+        const auto index = module.getKey()->getIndex();
         if (entry_count != 0U && key == previous_key && index == previous_index) {
             emit_diagnostic(
                 writer, diagnostics, "error", "module.navigation.stalled",
