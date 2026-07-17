@@ -17,9 +17,6 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-      - uses: github/codeql-action/init@ddf5ce7296213f5548c91e2dd19df2d77d2b2d66 # v3
-        with:
-          languages: c-cpp
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -29,6 +26,9 @@ jobs:
             pkg-config zlib1g-dev
       - name: Build pinned CrossWire SWORD
         run: ./scripts/build-sword.sh "$PWD/build/dependencies/sword"
+      - uses: github/codeql-action/init@ddf5ce7296213f5548c91e2dd19df2d77d2b2d66 # v3
+        with:
+          languages: c-cpp
       - name: Build getBibleSword
         env:
           PKG_CONFIG_PATH: ${{ github.workspace }}/build/dependencies/sword/lib/pkgconfig
