@@ -21,7 +21,6 @@
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
-#include <iterator>
 #include <limits>
 #include <optional>
 #include <stdexcept>
@@ -266,8 +265,46 @@ std::optional<std::string> read_file(const std::filesystem::path& path, std::str
         error_message = "Unable to open the configuration file.";
         return std::nullopt;
     }
-    std::string bytes((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
-    if (input.bad()) {
+
+    input.seekg(0, std::ios::end);
+    const auto end_position = input.tellg();
+    if (end_position == std::ifstream::pos_type(-1)) {
+        error_message = "Unable to determine the configuration file size.";
+        return std::nullopt;
+    }
+    const auto file_size = static_cast<std::streamoff>(end_position);
+    if (file_size < 0
+        || static_cast<std::uintmax_t>(file_size)
+            > static_cast<std::uintmax_t>(std::numeric_limits<std::size_t>::max())
+        || static_cast<std::uintmax_t>(file_size)
+            > static_cast<std::uintmax_t>(std::numeric_limits<std::streamsize>::max())) {
+        error_message = "The configuration file is too large to read safely.";
+        return std::nullopt;
+    }
+
+    input.seekg(0, std::ios::beg);
+    if (!input) {
+        error_message = "Unable to seek within the configuration file.";
+        return std::nullopt;
+    }
+
+    const auto byte_count = static_cast<std::size_t>(file_size);
+    std::string bytes(byte_count, '\0');
+    if (byte_count != 0U) {
+        const auto stream_count = static_cast<std::streamsize>(byte_count);
+        input.read(bytes.data(), stream_count);
+        if (input.gcount() != stream_count) {
+            error_message = "Unable to read the complete configuration file.";
+            return std::nullopt;
+        }
+    }
+
+    char extra_byte = '\0';
+    if (input.get(extra_byte)) {
+        error_message = "The configuration file changed while it was being read.";
+        return std::nullopt;
+    }
+    if (!input.eof()) {
         error_message = "Unable to read the complete configuration file.";
         return std::nullopt;
     }
