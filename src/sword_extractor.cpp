@@ -10,6 +10,7 @@
 #include <swbuf.h>
 #include <swconfig.h>
 #include <swkey.h>
+#include <swld.h>
 #include <swmgr.h>
 #include <swmodule.h>
 #include <swversion.h>
@@ -543,6 +544,20 @@ bool emit_entries(
         verse_key->setIntros(true);
     }
 
+    // Dictionary drivers can contain consecutive records with the same public
+    // key. Their internal index still advances, but SWKey exposes the same key
+    // text and the same default index for each record. Bound those traversals by
+    // the driver's authoritative entry count instead of treating a duplicate key
+    // as an infinite-loop stall.
+    std::optional<std::uint64_t> dictionary_entry_limit;
+    using sword::SWLD;
+    if (auto* dictionary = SWDYNAMIC_CAST(SWLD, &module); dictionary != nullptr) {
+        const auto count = dictionary->getEntryCount();
+        if (count >= 0) {
+            dictionary_entry_limit = static_cast<std::uint64_t>(count);
+        }
+    }
+
     module.setPosition(sword::TOP);
     if (module.popError() != 0) {
         emit_diagnostic(
@@ -560,7 +575,8 @@ bool emit_entries(
         // the authoritative traversal object and supplies the stable index for
         // every key type.
         const auto index = module.getKey()->getIndex();
-        if (entry_count != 0U && key == previous_key && index == previous_index) {
+        if (!dictionary_entry_limit && entry_count != 0U
+            && key == previous_key && index == previous_index) {
             emit_diagnostic(
                 writer, diagnostics, "error", "module.navigation.stalled",
                 "SWORD traversal did not advance to a new key.",
@@ -610,9 +626,22 @@ bool emit_entries(
         });
         ++entry_count;
 
+        if (dictionary_entry_limit && entry_count >= *dictionary_entry_limit) {
+            break;
+        }
+
         module.increment();
         const auto navigation_error = module.popError();
         if (navigation_error != 0) {
+            if (dictionary_entry_limit && navigation_error == KEYERR_OUTOFBOUNDS
+                && entry_count < *dictionary_entry_limit) {
+                emit_diagnostic(
+                    writer, diagnostics, "error", "module.entry_count.mismatch",
+                    "SWORD reached the end of a dictionary before its declared entry count.",
+                    {{"declared_entries", std::to_string(*dictionary_entry_limit)},
+                     {"emitted_entries", std::to_string(entry_count)}});
+                return false;
+            }
             if (navigation_error != KEYERR_OUTOFBOUNDS) {
                 emit_diagnostic(
                     writer, diagnostics, "error", "module.navigation.failed",

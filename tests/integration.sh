@@ -80,6 +80,11 @@ extract_twice TestResource
 
 grep -F 'x-unknown' "$temporary_directory/TestDictionary-1.ndjson" >/dev/null
 grep -F '"type":"config_source"' "$temporary_directory/TestDictionary-1.ndjson" >/dev/null
+if [[ $(grep -c '"key":{[^}]*"utf8":"KADESH"' \
+    "$temporary_directory/TestDictionary-1.ndjson") -ne 2 ]]; then
+    echo 'Duplicate dictionary keys were not preserved as separate entries.' >&2
+    exit 1
+fi
 grep -F '"type":"artifact_begin"' "$temporary_directory/TestResource-1.ndjson" \
     | grep -F 'media/plate.txt' >/dev/null
 

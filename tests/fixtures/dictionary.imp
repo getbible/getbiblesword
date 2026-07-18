@@ -2,3 +2,7 @@ $$$Alpha
 <entryFree n="Alpha"><def>First &amp; foremost.</def><note type="x-unknown">raw-note</note></entryFree>
 $$$Beta
 Second entry with an unrecognized @annotation.
+$$$KADESH
+First definition for a repeated dictionary key.
+$$$KADESH
+Second definition for the same repeated dictionary key.
