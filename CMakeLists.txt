@@ -20,6 +20,11 @@ include(CTest)
 
 option(GETBIBLESWORD_ENABLE_SANITIZERS "Enable AddressSanitizer and UndefinedBehaviorSanitizer" OFF)
 option(GETBIBLESWORD_WARNINGS_AS_ERRORS "Treat compiler warnings as errors" ON)
+option(
+  GETBIBLESWORD_ENABLE_CONFORMANCE_TESTS
+  "Build and run the complete CrossWire driver conformance corpus"
+  OFF
+)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(GetBibleSwordWarnings)
@@ -75,10 +80,27 @@ getbiblesword_set_warnings(getbiblesword)
 getbiblesword_enable_sanitizers(getbiblesword)
 
 install(TARGETS getbiblesword RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+install(
+  PROGRAMS tools/getbiblesword_v1.py
+  DESTINATION "${CMAKE_INSTALL_BINDIR}"
+  RENAME getbiblesword-v1
+)
 install(FILES LICENSE README.md SECURITY.md DESTINATION "${CMAKE_INSTALL_DOCDIR}")
 install(DIRECTORY docs/ schema/ DESTINATION "${CMAKE_INSTALL_DOCDIR}")
+install(
+  FILES
+    tests/corpus/manifest.json
+    tests/fixtures/dictionary.imp
+    tests/fixtures/general-book.imp
+    tests/fixtures/modules.conf
+    tests/fixtures/plate.txt
+    tests/fixtures/verse.imp
+    tests/fixtures/verse.osis.xml
+  DESTINATION "${CMAKE_INSTALL_DOCDIR}/conformance"
+)
 
 if(BUILD_TESTING)
+  find_package(Python3 3.9 REQUIRED COMPONENTS Interpreter)
   add_executable(getbiblesword_tests tests/test_main.cpp)
   target_compile_features(getbiblesword_tests PRIVATE cxx_std_20)
   target_link_libraries(getbiblesword_tests PRIVATE getbiblesword::core)
@@ -89,12 +111,23 @@ if(BUILD_TESTING)
   set_tests_properties(getbiblesword.contract PROPERTIES
     PASS_REGULAR_EXPRESSION "getbiblesword.ndjson/v1"
   )
+  add_test(
+    NAME getbiblesword.validator-unit
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/validator_test.py"
+  )
 
-  pkg_get_variable(SWORD_PREFIX sword prefix)
-  find_program(SWORD_IMP2LD imp2ld HINTS "${SWORD_PREFIX}/bin")
-  find_program(SWORD_IMP2GBS imp2gbs HINTS "${SWORD_PREFIX}/bin")
-  find_program(SWORD_IMP2VS imp2vs HINTS "${SWORD_PREFIX}/bin")
-  if(SWORD_IMP2LD AND SWORD_IMP2GBS AND SWORD_IMP2VS)
+  if(GETBIBLESWORD_ENABLE_CONFORMANCE_TESTS)
+    pkg_get_variable(SWORD_PREFIX sword prefix)
+    find_program(SWORD_IMP2LD imp2ld HINTS "${SWORD_PREFIX}/bin" REQUIRED)
+    find_program(SWORD_IMP2GBS imp2gbs HINTS "${SWORD_PREFIX}/bin" REQUIRED)
+    find_program(SWORD_IMP2VS imp2vs HINTS "${SWORD_PREFIX}/bin" REQUIRED)
+    find_program(SWORD_OSIS2MOD osis2mod HINTS "${SWORD_PREFIX}/bin" REQUIRED)
+    add_executable(getbiblesword_corpus_writer tests/corpus_writer.cpp)
+    target_compile_features(getbiblesword_corpus_writer PRIVATE cxx_std_20)
+    target_include_directories(getbiblesword_corpus_writer SYSTEM PRIVATE ${SWORD_INCLUDE_DIRS})
+    target_link_libraries(getbiblesword_corpus_writer PRIVATE PkgConfig::SWORD)
+    getbiblesword_set_warnings(getbiblesword_corpus_writer)
+    getbiblesword_enable_sanitizers(getbiblesword_corpus_writer)
     add_test(
       NAME getbiblesword.sword-integration
       COMMAND
@@ -103,7 +136,11 @@ if(BUILD_TESTING)
         "${SWORD_IMP2LD}"
         "${SWORD_IMP2GBS}"
         "${SWORD_IMP2VS}"
+        "${SWORD_OSIS2MOD}"
+        "$<TARGET_FILE:getbiblesword_corpus_writer>"
+        "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/tools/getbiblesword_v1.py"
     )
-    set_tests_properties(getbiblesword.sword-integration PROPERTIES TIMEOUT 180)
+    set_tests_properties(getbiblesword.sword-integration PROPERTIES TIMEOUT 900)
   endif()
 endif()

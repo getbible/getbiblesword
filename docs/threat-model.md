@@ -26,6 +26,10 @@ is not assumed to be small.
 - Do not accept cipher keys through command-line arguments or environment variables.
 - Refuse accidental output overwrite unless `--force` is explicit.
 - Detect input mutation during extraction and fail the stream.
+- Validate the complete stream before reconstruction, refuse existing destinations,
+  reject path traversal and write through a sibling staging directory.
+- Refuse symlink reconstruction unless the operator explicitly allows it; never
+  follow reconstructed links while writing another artifact.
 - Run unit tests under ASan/UBSan and continuous CodeQL analysis.
 - Build releases from the official SWORD 1.9.0 tarball with a pinned SHA-256.
 

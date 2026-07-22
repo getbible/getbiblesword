@@ -70,3 +70,32 @@ jobs:
           cmake --preset sanitizers
           cmake --build --preset sanitizers --parallel
           ctest --preset sanitizers
+
+  conformance:
+    name: CrossWire driver conformance
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            autoconf automake build-essential cmake curl libbz2-dev \
+            libcurl4-openssl-dev libicu-dev liblzma-dev libtool ninja-build \
+            pkg-config zlib1g-dev
+      - name: Build pinned CrossWire SWORD
+        run: ./scripts/build-sword.sh "$PWD/build/dependencies/sword"
+      - name: Configure conformance suite
+        env:
+          PKG_CONFIG_PATH: ${{ github.workspace }}/build/dependencies/sword/lib/pkgconfig
+        run: |
+          cmake \
+            -S . \
+            -B build/conformance \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DGETBIBLESWORD_ENABLE_CONFORMANCE_TESTS=ON
+      - name: Build
+        run: cmake --build build/conformance --parallel
+      - name: Run every driver and artifact round trip
+        run: ctest --test-dir build/conformance --output-on-failure

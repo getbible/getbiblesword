@@ -17,10 +17,10 @@ any dependency on the engine.
 - [x] Structured diagnostics and nonzero failure exits.
 - [x] Unit, deterministic contract, sanitizer and static-analysis CI.
 - [x] Reproducible release scripts for Linux x86-64 and ARM64.
-- [ ] CrossWire-distributable conformance corpus covering every driver family.
-- [ ] Independent v1 validator and round-trip artifact reassembler.
+- [x] CrossWire-distributable [conformance corpus](conformance-corpus.md) covering every driver family.
+- [x] Independent [v1 validator and round-trip artifact reassembler](validator-v1.md).
 - [ ] Maintainer review of the v1 schema and classification policy.
 
-The last three items gate a stable `1.0.0`; they do not block the `0.1.0` engineering
-preview. No Builder integration starts until the conformance corpus and validator
-are complete.
+The final maintainer review gates a stable `1.0.0`. The two automated integration
+prerequisites are complete; use the [review packet](schema-review-v1.md) to decide
+whether Builder integration may begin and whether any v1 changes are required.

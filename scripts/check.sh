@@ -10,7 +10,8 @@ git -C "$repository_root" diff --check
 
 while IFS= read -r script; do
     bash -n "$script"
-done < <(find "$repository_root/scripts" -type f -name '*.sh' -print | sort)
+done < <(find "$repository_root/scripts" "$repository_root/tests" \
+    -type f -name '*.sh' -print | sort)
 
 if command -v jq >/dev/null 2>&1; then
     while IFS= read -r document; do
@@ -27,6 +28,6 @@ while IFS= read -r source; do
     fi
 done < <(find "$repository_root" \
     -path "$repository_root/build" -prune -o \
-    -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.hpp.in' -o -name '*.cmake' -o -name '*.sh' \) -print | sort)
+    -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.hpp.in' -o -name '*.cmake' -o -name '*.py' -o -name '*.sh' \) -print | sort)
 
 echo 'Repository checks passed'

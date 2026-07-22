@@ -30,8 +30,10 @@ Neither side substitutes for the other.
 | `getbiblesword_core` | SHA-256, base64, byte envelopes, canonical JSON, NDJSON framing and raw annotation segmentation |
 | `getbiblesword_sword` | SWORD discovery, classification, traversal, configuration projection and artifact capture |
 | `getbiblesword` | Strict CLI, output lifecycle, exit codes and user-facing errors |
+| `getbiblesword-v1` | Independent Python validator and atomic artifact reconstruction |
 | `schema/v1` | Machine-readable contract boundary |
-| `tests` | Unit, golden, determinism and synthetic module coverage |
+| `tests/corpus` | Public-domain all-driver conformance manifest and source fixtures |
+| `tests` | Unit, negative, determinism, conformance and round-trip coverage |
 
 ## Determinism rules
 
