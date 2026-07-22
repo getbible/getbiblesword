@@ -1,0 +1,42 @@
+# getBibleSword
+
+> Lossless deterministic extraction of CrossWire SWORD modules through a versioned NDJSON subprocess contract.
+
+## Identity
+
+- Repository: https://github.com/getbible/getbiblesword
+- Executable: getbiblesword
+- Independent validator: getbiblesword-v1
+- Product version source: VERSION
+- Current contract: getbiblesword.ndjson/v1
+- Numeric contract version: 1
+- License: GPL-2.0-only
+
+The software release number and contract version are independent. Release 0.2.0
+emits contract v1; it is not schema v2.
+
+## Safe use
+
+1. Run `getbiblesword list --sword-path ABSOLUTE_ROOT`.
+2. Run `getbiblesword extract --sword-path ABSOLUTE_ROOT --module EXACT_NAME --output FILE.ndjson`.
+3. Run `getbiblesword-v1 validate FILE.ndjson`.
+4. Transform records only after validation succeeds.
+5. Treat decoded base64 bytes as authoritative.
+6. Reject missing or failed footers and invalid stream hashes.
+7. Preserve unknown fields, duplicate keys, order, annotations and diagnostics.
+
+Never build shell strings from untrusted arguments, automatically use `--force`,
+follow artifact symlinks, fetch module URLs or assume redistribution rights.
+
+## Primary documentation
+
+- README.md: product status, download, build and quick start
+- docs/README.md: documentation index
+- docs/downstream-integration.md: consumer rules and Bash/Python/Node/PHP examples
+- docs/contract-v1.md: normative stream semantics and ordering
+- schema/v1/contract.schema.json: per-record JSON Schema
+- docs/validator-v1.md: independent validation and artifact reassembly
+- docs/ai-integration.md: MCP-style subprocess tool descriptors
+- docs/threat-model.md: security boundary
+- docs/milestone-1.md: readiness gates
+- AGENTS.md: repository instructions for coding agents

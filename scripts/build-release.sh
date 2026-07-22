@@ -52,6 +52,24 @@ cmake --build "$build_directory" --parallel
 ctest --test-dir "$build_directory" --output-on-failure
 DESTDIR="$stage_directory" cmake --install "$build_directory" --strip
 
+readonly installed_documentation="$stage_directory/usr/share/doc/getBibleSword"
+readonly required_installed_files=(
+    "$stage_directory/usr/bin/getbiblesword"
+    "$stage_directory/usr/bin/getbiblesword-v1"
+    "$installed_documentation/AGENTS.md"
+    "$installed_documentation/README.md"
+    "$installed_documentation/llms.txt"
+    "$installed_documentation/docs/contract-v1.md"
+    "$installed_documentation/docs/downstream-integration.md"
+    "$installed_documentation/schema/v1/contract.schema.json"
+)
+for installed_file in "${required_installed_files[@]}"; do
+    if [[ ! -f "$installed_file" ]]; then
+        printf 'Required release file is missing: %s\n' "$installed_file" >&2
+        exit 1
+    fi
+done
+
 tar \
     --create \
     --gzip \
