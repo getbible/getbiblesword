@@ -15,15 +15,17 @@ project.
 
 ## Current phase
 
-Version `0.1.x` is an engineering preview of the extraction boundary. It is ready
-for protocol validation, conformance-corpus work and independent validator work.
-Do not treat it as the final Builder 3 or Study Builder data model.
+Version `0.2.x` is an engineering preview of the extraction boundary. The full
+driver conformance corpus and independent validator/reassembler are complete. Do
+not treat it as the final Builder 3 or Study Builder data model until the remaining
+maintainer review is recorded.
 
 The remaining stable-1.0 gates are recorded in `docs/milestone-1.md`:
 
-1. a redistributable conformance corpus covering every SWORD driver family;
-2. an independent NDJSON validator and artifact reassembler;
-3. maintainer review of the v1 schema and classification policy.
+1. ~~a redistributable conformance corpus covering every SWORD driver family~~;
+2. ~~an independent NDJSON validator and artifact reassembler~~;
+3. maintainer review of the v1 schema and classification policy, using
+   `docs/schema-review-v1.md`.
 
 ## Sources of truth
 
@@ -35,6 +37,9 @@ Read these in order when orienting a new project session:
 4. `docs/architecture.md` for component boundaries and design decisions;
 5. `docs/threat-model.md` for trust boundaries and resource hazards;
 6. `docs/milestone-1.md` for phase gates and integration readiness.
+
+Use `docs/schema-review-v1.md` for the final stable-v1 product decision and
+`docs/conformance-corpus.md` for the physical-driver coverage matrix.
 
 The prose contract is authoritative when a schema cannot express an ordering,
 byte-preservation or hashing rule.

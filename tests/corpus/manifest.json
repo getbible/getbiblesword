@@ -1,0 +1,28 @@
+{
+  "contract": "getbiblesword.conformance-corpus/v1",
+  "license": "Public Domain",
+  "sword_version": "1.9.0",
+  "drivers": [
+    {"module": "CorpusRawText", "driver": "RawText", "classification": "bible", "family": "verse-raw-16"},
+    {"module": "CorpusRawText4", "driver": "RawText4", "classification": "bible", "family": "verse-raw-32"},
+    {"module": "CorpusZText", "driver": "zText", "classification": "bible", "family": "verse-compressed-16"},
+    {"module": "CorpusZText4", "driver": "zText4", "classification": "bible", "family": "verse-compressed-32"},
+    {"module": "CorpusRawCom", "driver": "RawCom", "classification": "commentary", "family": "commentary-raw-16"},
+    {"module": "CorpusRawCom4", "driver": "RawCom4", "classification": "commentary", "family": "commentary-raw-32"},
+    {"module": "CorpusZCom", "driver": "zCom", "classification": "commentary", "family": "commentary-compressed-16"},
+    {"module": "CorpusZCom4", "driver": "zCom4", "classification": "commentary", "family": "commentary-compressed-32"},
+    {"module": "CorpusRawFiles", "driver": "RawFiles", "classification": "commentary", "family": "commentary-file-backed"},
+    {"module": "CorpusHREFCom", "driver": "HREFCom", "classification": "commentary", "family": "commentary-hyperlink"},
+    {"module": "CorpusRawLD", "driver": "RawLD", "classification": "dictionary_or_lexicon", "family": "dictionary-raw-16"},
+    {"module": "CorpusRawLD4", "driver": "RawLD4", "classification": "dictionary_or_lexicon", "family": "dictionary-raw-32"},
+    {"module": "CorpusZLD", "driver": "zLD", "classification": "dictionary_or_lexicon", "family": "dictionary-compressed"},
+    {"module": "CorpusRawGenBook", "driver": "RawGenBook", "classification": "general_book", "family": "tree-key"}
+  ],
+  "aliases": [
+    {"driver": "RawGBF", "covered_by": "RawText", "reason": "SWORD 1.9.0 instantiates RawGBF through the RawText implementation"}
+  ],
+  "classification_variants": [
+    {"module": "CorpusDevotional", "driver": "RawLD", "classification": "devotional"},
+    {"module": "CorpusResource", "driver": "RawGenBook", "classification": "resource"}
+  ]
+}

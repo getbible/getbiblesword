@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osis xmlns="http://www.bibletechnologies.net/2003/OSIS/namespace">
+  <osisText osisIDWork="CorpusBible" osisRefWork="defaultReferenceScheme" xml:lang="en">
+    <header>
+      <work osisWork="CorpusBible">
+        <title>getBibleSword public-domain conformance text</title>
+        <identifier type="OSIS">CorpusBible</identifier>
+        <refSystem>Bible.KJV</refSystem>
+      </work>
+      <work osisWork="defaultReferenceScheme">
+        <refSystem>Bible.KJV</refSystem>
+      </work>
+    </header>
+    <div type="book" osisID="Gen">
+      <chapter osisID="Gen.1">
+        <verse osisID="Gen.1.1">In the beginning was a conformance fixture.</verse>
+        <verse osisID="Gen.1.2">Its bytes are deliberately small and public domain.</verse>
+      </chapter>
+    </div>
+  </osisText>
+</osis>

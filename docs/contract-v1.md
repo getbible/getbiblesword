@@ -101,3 +101,7 @@ navigation errors and detected input mutation must produce diagnostics.
 The footer contains record counts, logical entry count, artifact byte count,
 diagnostic counts, `success` and `stream_sha256`. To verify, hash the exact bytes of
 every line before the footer, including LF. The footer itself is excluded.
+
+The independent `getbiblesword-v1 validate` reference consumer checks these rules,
+including ordering and hashes that JSON Schema cannot express. A consumer must not
+treat successful JSON Schema validation alone as proof of a valid stream.

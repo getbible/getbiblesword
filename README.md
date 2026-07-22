@@ -22,10 +22,14 @@ Study Builder integration:
 - raw entry bytes, default render, stripped text and official entry attributes;
 - lossless raw annotation tokenization and structured diagnostics;
 - x86-64 and ARM64 Linux release automation using pinned SWORD 1.9.0 source;
-- unit, contract, sanitizer and static-analysis workflows.
+- unit, contract, sanitizer and static-analysis workflows;
+- a public-domain conformance corpus for every concrete SWORD 1.9.0 driver; and
+- an independent v1 validator and safe artifact reassembler.
 
 See [the protocol](docs/contract-v1.md), [architecture](docs/architecture.md),
-[threat model](docs/threat-model.md) and [milestone acceptance criteria](docs/milestone-1.md).
+[conformance corpus](docs/conformance-corpus.md),
+[validator](docs/validator-v1.md), [threat model](docs/threat-model.md) and
+[milestone acceptance criteria](docs/milestone-1.md).
 
 ## Build
 
@@ -59,6 +63,13 @@ getbiblesword contract
 getbiblesword version
 ```
 
+Validate an export independently or reconstruct its source artifacts:
+
+```sh
+getbiblesword-v1 validate kjv.ndjson
+getbiblesword-v1 reassemble kjv.ndjson reconstructed-kjv
+```
+
 `extract` refuses to overwrite an existing output file unless `--force` is given.
 NDJSON is written to standard output when `--output` is omitted. Operational
 errors go to standard error; extraction warnings and failures are also preserved
@@ -67,8 +78,9 @@ as contract diagnostics.
 ## Non-goals for this milestone
 
 This repository does not generate the GetBible API shape, Builder templates or
-Study Builder repositories. Those become downstream consumers only after the v1
-contract and conformance corpus are stable.
+Study Builder repositories. Those remain downstream consumers; the final v1
+schema and classification review is tracked in the
+[maintainer review packet](docs/schema-review-v1.md).
 
 ## License
 

@@ -46,7 +46,8 @@ PKG_CONFIG_PATH="$dependency_prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG
         -G Ninja \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr \
-        -DBUILD_TESTING=ON
+        -DBUILD_TESTING=ON \
+        -DGETBIBLESWORD_ENABLE_CONFORMANCE_TESTS=ON
 cmake --build "$build_directory" --parallel
 ctest --test-dir "$build_directory" --output-on-failure
 DESTDIR="$stage_directory" cmake --install "$build_directory" --strip

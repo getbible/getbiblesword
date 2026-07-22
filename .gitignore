@@ -8,5 +8,7 @@ compile_commands.json
 *.gcno
 *.profraw
 *.profdata
+__pycache__/
+*.py[cod]
 *.swp
 *~
