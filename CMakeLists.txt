@@ -85,8 +85,11 @@ install(
   DESTINATION "${CMAKE_INSTALL_BINDIR}"
   RENAME getbiblesword-v1
 )
-install(FILES LICENSE README.md SECURITY.md DESTINATION "${CMAKE_INSTALL_DOCDIR}")
-install(DIRECTORY docs/ schema/ DESTINATION "${CMAKE_INSTALL_DOCDIR}")
+install(
+  FILES AGENTS.md LICENSE README.md SECURITY.md llms.txt
+  DESTINATION "${CMAKE_INSTALL_DOCDIR}"
+)
+install(DIRECTORY docs schema DESTINATION "${CMAKE_INSTALL_DOCDIR}")
 install(
   FILES
     tests/corpus/manifest.json

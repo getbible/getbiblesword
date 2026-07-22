@@ -16,7 +16,7 @@ all preceding serialized lines.
 Every untrusted or source-derived string uses the same lossless object:
 
 ```json
-{"base64":"S0pW","encoding":"base64","sha256":"a6b10c...","size":3,"utf8":"KJV"}
+{"base64":"S0pW","encoding":"base64","sha256":"f98326ec7971053443d80268b911680a0eec8d4ead3b1d67445b7d534f1b5b2f","size":3,"utf8":"KJV"}
 ```
 
 `base64`, `encoding`, `sha256` and `size` are required. `utf8` is present only when

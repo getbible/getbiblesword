@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Security fixes are applied to the latest release line and `master`.
+Security fixes are applied to the latest release line and `main`.
 
 ## Reporting
 

@@ -4,6 +4,15 @@ All notable changes are documented here. The project follows Semantic Versioning
 
 ## [Unreleased]
 
+- Add concise CI, CodeQL, release, version and license badges.
+- Add download instructions, a documentation index, downstream language examples,
+  an AI orientation index and MCP-style subprocess tool descriptors.
+- Preserve the documented `docs/` and `schema/` paths in installed release
+  archives instead of flattening both directories, and fail release packaging if
+  required binaries or integration documents are missing.
+- Clarify that product release `0.2.0` emits NDJSON contract v1 rather than a v2
+  schema, and correct the supported branch name in the security policy.
+
 ## [0.2.0] - 2026-07-22
 
 - Add a public-domain conformance corpus for all 14 concrete SWORD 1.9.0 drivers,

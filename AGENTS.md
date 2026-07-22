@@ -32,14 +32,18 @@ The remaining stable-1.0 gates are recorded in `docs/milestone-1.md`:
 Read these in order when orienting a new project session:
 
 1. `README.md` for the product, build and CLI overview;
-2. `docs/contract-v1.md` for the normative NDJSON semantics and record order;
-3. `schema/v1/contract.schema.json` for machine validation;
-4. `docs/architecture.md` for component boundaries and design decisions;
-5. `docs/threat-model.md` for trust boundaries and resource hazards;
-6. `docs/milestone-1.md` for phase gates and integration readiness.
+2. `docs/README.md` for audience-specific documentation paths;
+3. `docs/downstream-integration.md` for consumer rules and examples;
+4. `docs/contract-v1.md` for the normative NDJSON semantics and record order;
+5. `schema/v1/contract.schema.json` for machine validation;
+6. `docs/architecture.md` for component boundaries and design decisions;
+7. `docs/threat-model.md` for trust boundaries and resource hazards;
+8. `docs/milestone-1.md` for phase gates and integration readiness.
 
 Use `docs/schema-review-v1.md` for the final stable-v1 product decision and
 `docs/conformance-corpus.md` for the physical-driver coverage matrix.
+Use `llms.txt` and `docs/ai-integration.md` to orient AI consumers or design a
+subprocess-to-MCP wrapper; neither file defines or implements an MCP server.
 
 The prose contract is authoritative when a schema cannot express an ordering,
 byte-preservation or hashing rule.
