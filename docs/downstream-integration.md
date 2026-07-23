@@ -2,15 +2,17 @@
 
 ## Compatibility boundary
 
-`getbiblesword` is a subprocess protocol producer, not an application data model.
-Run it against an explicit SWORD installation, validate the resulting NDJSON, and
-then transform validated records in a separate adapter owned by the consuming
-project.
+getBibleSword is a protocol producer, not an application data model. Consumers
+may use the standalone `getbiblesword` process or `libgetbiblesword.so.1`. Both
+frontends produce identical NDJSON for the same operation, product version,
+module bytes and options. Run either frontend against an explicit SWORD
+installation, validate the resulting NDJSON, and then transform validated records
+in a separate adapter owned by the consuming project.
 
-The product version and protocol version are independent. Release `0.2.0` emits
-contract `getbiblesword.ndjson/v1` with numeric `contract_version: 1`. Consumers
-must inspect the stream header instead of inferring compatibility from the binary
-or archive version.
+The product version, native ABI and protocol version are independent. Release
+`0.3.0` provides native ABI 1 and emits contract `getbiblesword.ndjson/v1` with
+numeric `contract_version: 1`. Consumers must inspect the stream header instead
+of inferring compatibility from the binary, library or archive version.
 
 ## Safe pipeline
 
@@ -29,6 +31,10 @@ pre-footer stream bytes.
 
 For large modules, keep the export on disk or stream it record by record. Do not
 load the full document into memory and do not wrap the lines in a JSON array.
+
+Native consumers follow the same validate-before-use rule. C callback chunks are
+not record boundaries and a successful C function status does not replace footer,
+digest, sequence or byte-envelope validation. See [C ABI v1](c-api-v1.md).
 
 ## Record map
 

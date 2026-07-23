@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-only
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/getBibleSwordTargets.cmake")
+check_required_components(getBibleSword)

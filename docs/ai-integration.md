@@ -5,24 +5,29 @@
 This document gives AI agents and automation wrappers enough structured
 information to operate `getbiblesword` safely. It is not an MCP server and does
 not define a network transport. A host can expose the CLI as MCP tools by mapping
-validated input arguments to subprocess argument arrays.
+validated input arguments to subprocess argument arrays. Native hosts can instead
+use the C ABI described in [c-api-v1.md](c-api-v1.md), while preserving the same
+validation boundary.
 
 ## Agent facts
 
 - Product and executable: `getBibleSword` / `getbiblesword`.
-- Current release line: `0.2.x` engineering preview.
+- Current release line: `0.3.x` engineering preview.
 - Output contract: `getbiblesword.ndjson/v1`, numeric version `1`.
 - Engine: official CrossWire SWORD, pinned to `1.9.0` in release builds.
-- Transport: local subprocess; stdout is NDJSON, stderr is operational logging.
+- Transports: local subprocess or `libgetbiblesword.so.1` callback stream.
+- MCP wrappers should normally retain the subprocess transport for process
+  isolation; native host integrations may use the C ABI deliberately.
 - Required discovery boundary: an explicit absolute SWORD installation root.
 - Validation command: `getbiblesword-v1 validate INPUT`.
 - Authoritative content: decoded bytes in each `base64` byte envelope.
 - Stable success gate: validator exit zero and `footer.success == true`.
 - License: GPL-2.0-only; module content retains its own separate rights.
 
-Do not describe release `0.2.0` as schema v2. The product release and contract
-version are separate. Do not transform an export until independent validation has
-completed, and do not invoke these commands through an interpolated shell string.
+Do not describe release `0.3.0` as schema v3. The product release, native ABI and
+contract version are separate. Do not transform an export until independent
+validation has completed, and do not invoke these commands through an
+interpolated shell string.
 
 ## Suggested tool descriptors
 

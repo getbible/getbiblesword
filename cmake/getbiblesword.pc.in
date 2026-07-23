@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: GPL-2.0-only
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: libgetbiblesword
+Description: Stable C ABI for lossless CrossWire SWORD module extraction
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -lgetbiblesword
+Cflags: -I${includedir}

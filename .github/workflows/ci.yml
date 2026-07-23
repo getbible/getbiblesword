@@ -26,7 +26,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes \
-            autoconf automake build-essential clang cmake curl jq libbz2-dev \
+            autoconf automake binutils build-essential clang cmake curl jq libbz2-dev \
             libcurl4-openssl-dev libicu-dev liblzma-dev libtool ninja-build \
             pkg-config zlib1g-dev
       - name: Build pinned CrossWire SWORD
@@ -39,6 +39,11 @@ jobs:
         run: cmake --build --preset dev --parallel
       - name: Test
         run: ctest --preset dev
+      - name: Verify installed C consumers
+        run: |
+          DESTDIR="$PWD/build/stage-${{ matrix.compiler }}" \
+            cmake --install build/dev
+          ./tests/installed_consumer.sh "$PWD/build/stage-${{ matrix.compiler }}"
       - name: Verify deterministic empty-root listing
         run: |
           mkdir -p build/empty-sword/mods.d
@@ -56,7 +61,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes \
-            autoconf automake build-essential cmake curl libbz2-dev \
+            autoconf automake binutils build-essential cmake curl libbz2-dev \
             libcurl4-openssl-dev libicu-dev liblzma-dev libtool ninja-build \
             pkg-config zlib1g-dev
       - name: Build pinned CrossWire SWORD
@@ -71,6 +76,29 @@ jobs:
           cmake --build --preset sanitizers --parallel
           ctest --preset sanitizers
 
+  system-provider:
+    name: System SWORD provider
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Install system SWORD development package
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            binutils build-essential cmake libsword-dev ninja-build pkg-config
+      - name: Configure system-provider build
+        run: |
+          cmake \
+            -S . \
+            -B build/system \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DGETBIBLESWORD_SWORD_PROVIDER=SYSTEM
+      - name: Build
+        run: cmake --build build/system --parallel
+      - name: Test
+        run: ctest --test-dir build/system --output-on-failure
+
   conformance:
     name: CrossWire driver conformance
     runs-on: ubuntu-24.04
@@ -80,7 +108,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes \
-            autoconf automake build-essential cmake curl libbz2-dev \
+            autoconf automake binutils build-essential cmake curl libbz2-dev \
             libcurl4-openssl-dev libicu-dev liblzma-dev libtool ninja-build \
             pkg-config zlib1g-dev
       - name: Build pinned CrossWire SWORD

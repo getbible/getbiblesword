@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: GPL-2.0-only
+GETBIBLESWORD_1.0 {
+    global:
+        gbs_abi_version;
+        gbs_product_version;
+        gbs_contract_identifier;
+        gbs_status_message;
+        gbs_list_modules_v1;
+        gbs_extract_module_v1;
+    local:
+        *;
+};

@@ -28,6 +28,17 @@ while IFS= read -r source; do
     fi
 done < <(find "$repository_root" \
     -path "$repository_root/build" -prune -o \
-    -type f \( -name '*.cpp' -o -name '*.hpp' -o -name '*.hpp.in' -o -name '*.cmake' -o -name '*.py' -o -name '*.sh' \) -print | sort)
+    -type f \( \
+        -name '*.c' -o \
+        -name '*.cpp' -o \
+        -name '*.h' -o \
+        -name '*.hpp' -o \
+        -name '*.hpp.in' -o \
+        -name '*.cmake' -o \
+        -name '*.map' -o \
+        -name '*.pc.in' -o \
+        -name '*.py' -o \
+        -name '*.sh' \
+    \) -print | sort)
 
 echo 'Repository checks passed'

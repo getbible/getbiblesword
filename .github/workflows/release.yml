@@ -54,7 +54,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes \
-            autoconf automake build-essential cmake curl libbz2-dev \
+            autoconf automake binutils build-essential cmake curl libbz2-dev \
             libcurl4-openssl-dev libicu-dev liblzma-dev libtool ninja-build \
             pkg-config zlib1g-dev
       - name: Build release archive

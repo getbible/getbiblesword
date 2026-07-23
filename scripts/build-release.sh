@@ -47,18 +47,46 @@ PKG_CONFIG_PATH="$dependency_prefix/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr \
         -DBUILD_TESTING=ON \
+        -DGETBIBLESWORD_SWORD_PROVIDER=BUNDLED \
         -DGETBIBLESWORD_ENABLE_CONFORMANCE_TESTS=ON
 cmake --build "$build_directory" --parallel
 ctest --test-dir "$build_directory" --output-on-failure
 DESTDIR="$stage_directory" cmake --install "$build_directory" --strip
 
 readonly installed_documentation="$stage_directory/usr/share/doc/getBibleSword"
+readonly shared_library="$(
+    find "$stage_directory/usr" \
+        -type f \
+        -name "libgetbiblesword.so.$version" \
+        -print \
+        -quit
+)"
+readonly pkg_config_file="$(
+    find "$stage_directory/usr" \
+        -type f \
+        -path '*/pkgconfig/getbiblesword.pc' \
+        -print \
+        -quit
+)"
+readonly cmake_config_file="$(
+    find "$stage_directory/usr" \
+        -type f \
+        -path '*/cmake/getBibleSword/getBibleSwordConfig.cmake' \
+        -print \
+        -quit
+)"
 readonly required_installed_files=(
     "$stage_directory/usr/bin/getbiblesword"
     "$stage_directory/usr/bin/getbiblesword-v1"
+    "$stage_directory/usr/include/getbiblesword/c_api.h"
+    "$stage_directory/usr/include/getbiblesword/export.h"
+    "$shared_library"
+    "$pkg_config_file"
+    "$cmake_config_file"
     "$installed_documentation/AGENTS.md"
     "$installed_documentation/README.md"
     "$installed_documentation/llms.txt"
+    "$installed_documentation/docs/c-api-v1.md"
     "$installed_documentation/docs/contract-v1.md"
     "$installed_documentation/docs/downstream-integration.md"
     "$installed_documentation/schema/v1/contract.schema.json"
@@ -69,6 +97,12 @@ for installed_file in "${required_installed_files[@]}"; do
         exit 1
     fi
 done
+
+"$repository_root/scripts/check-abi.sh" \
+    "$shared_library" \
+    "$stage_directory/usr/bin/getbiblesword" \
+    BUNDLED
+"$repository_root/tests/installed_consumer.sh" "$stage_directory"
 
 tar \
     --create \

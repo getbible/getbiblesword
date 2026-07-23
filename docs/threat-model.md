@@ -32,6 +32,12 @@ is not assumed to be small.
   follow reconstructed links while writing another artifact.
 - Run unit tests under ASan/UBSan and continuous CodeQL analysis.
 - Build releases from the official SWORD 1.9.0 tarball with a pinned SHA-256.
+- Compile the bundled static SWORD engine as PIC, hide all private C++ and SWORD
+  symbols, and export only the versioned `gbs_*` C allowlist.
+- Catch every exception at the C boundary and turn callback cancellation or
+  failure into explicit status codes.
+- Keep the standalone CLI independently linked so adding the shared library
+  cannot create a new runtime dependency for existing downstream deployments.
 
 ## Residual risks
 
@@ -39,6 +45,13 @@ The SWORD engine parses untrusted module formats in-process. A memory-safety fla
 SWORD or a linked decompression library can affect getBibleSword. A future hardened
 runner may add seccomp, namespaces and resource limits, but those must wrap this CLI
 rather than alter the contract.
+
+A process using `libgetbiblesword.so.1` deliberately gives up the CLI process
+isolation boundary. A memory-safety failure in SWORD, a linked dependency or the
+extractor can terminate or compromise the host process, including a PHP-FPM
+worker. Native consumers must apply operating-system confinement, resource limits,
+module provenance controls and worker recycling appropriate to their deployment.
+The C ABI contains C++ exceptions but cannot contain native memory corruption.
 
 Artifact capture can expose copyrighted or confidential module bytes. Operators are
 responsible for authorization and distribution rights; the tool performs extraction,
