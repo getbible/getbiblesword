@@ -2,9 +2,10 @@
 
 ## Boundary
 
-`getbiblesword` is an extraction engine and protocol producer. It has no Builder
-model, database, template layer or HTTP API. Builder 3 and Study Builder consume
-validated NDJSON later and must never depend on SWORD's in-process C++ types.
+getBibleSword is an extraction engine and protocol producer. It has no Builder
+model, database, template layer or HTTP API. The standalone CLI and stable C ABI
+are two frontends over the same extraction implementation. Builder 3, Study
+Builder and native consumers must never depend on SWORD's in-process C++ types.
 
 ```mermaid
 flowchart TD
@@ -14,8 +15,9 @@ flowchart TD
   C --> E["Exact source envelope"]
   D --> F["NDJSON v1 writer"]
   E --> F
-  F --> G["Conformance validator"]
-  G --> H["Future Builder consumers"]
+  F --> G["CLI or C callback"]
+  G --> H["Conformance validator"]
+  H --> I["Downstream consumers"]
 ```
 
 The SWORD engine owns module discovery, driver selection, key traversal, raw entry
@@ -30,6 +32,7 @@ Neither side substitutes for the other.
 | `getbiblesword_core` | SHA-256, base64, byte envelopes, canonical JSON, NDJSON framing and raw annotation segmentation |
 | `getbiblesword_sword` | SWORD discovery, classification, traversal, configuration projection and artifact capture |
 | `getbiblesword` | Strict CLI, output lifecycle, exit codes and user-facing errors |
+| `libgetbiblesword.so.1` | C-only callback ABI, argument validation, status mapping and exception containment |
 | `getbiblesword-v1` | Independent Python validator and atomic artifact reconstruction |
 | `schema/v1` | Machine-readable contract boundary |
 | `tests/corpus` | Public-domain all-driver conformance manifest and source fixtures |
@@ -59,3 +62,9 @@ The contract identifier is `getbiblesword.ndjson/v1`. Additive fields are allowe
 within v1. A consumer must ignore unknown fields but must reject an unknown major
 contract version. Removing a field, changing ordering semantics, changing digest
 input or changing a field's meaning requires v2.
+
+The native ABI is versioned independently. SONAME 1 exports only the documented
+`gbs_*` symbols. The CLI is linked directly to the private static implementation,
+not through the shared library, so existing binary-only deployments remain
+self-contained. Official builds statically embed the pinned SWORD engine in both
+frontends and verify that neither has a `libsword.so` runtime dependency.

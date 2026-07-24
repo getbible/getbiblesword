@@ -32,6 +32,8 @@ pushd "$work_directory/sword-${SWORD_VERSION}" >/dev/null
     --prefix="$install_prefix" \
     --disable-shared \
     --enable-static \
+    --disable-tests \
+    --with-pic \
     --without-clucene
 make --jobs="${JOBS:-$(nproc)}"
 make install

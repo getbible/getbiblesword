@@ -4,8 +4,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-if (($# != 8)); then
-    echo "Usage: $0 GETBIBLESWORD IMP2LD IMP2GBS IMP2VS OSIS2MOD CORPUS_WRITER PYTHON VALIDATOR" >&2
+if (($# != 9)); then
+    echo "Usage: $0 GETBIBLESWORD IMP2LD IMP2GBS IMP2VS OSIS2MOD CORPUS_WRITER PYTHON VALIDATOR C_API_DRIVER" >&2
     exit 2
 fi
 
@@ -17,6 +17,7 @@ readonly osis2mod=$5
 readonly corpus_writer=$6
 readonly python=$7
 readonly validator=$8
+readonly c_api_driver=$9
 readonly test_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly fixture_root="$test_root/fixtures"
 readonly manifest="$test_root/corpus/manifest.json"
@@ -83,7 +84,9 @@ cp "$fixture_root/plate.txt" \
 
 "$binary" list --sword-path "$sword_root" > "$temporary_directory/list-1.ndjson"
 "$binary" list --sword-path "$sword_root" > "$temporary_directory/list-2.ndjson"
+"$c_api_driver" list "$sword_root" > "$temporary_directory/list-c-api.ndjson"
 cmp "$temporary_directory/list-1.ndjson" "$temporary_directory/list-2.ndjson"
+cmp "$temporary_directory/list-1.ndjson" "$temporary_directory/list-c-api.ndjson"
 "$python" "$validator" validate "$temporary_directory/list-1.ndjson" >/dev/null
 
 manifest_rows() {
@@ -114,13 +117,16 @@ extract_validate_reassemble() {
     local module=$1
     local first="$temporary_directory/$module-1.ndjson"
     local second="$temporary_directory/$module-2.ndjson"
+    local c_api="$temporary_directory/$module-c-api.ndjson"
     local reassembled="$temporary_directory/$module-reassembled"
 
     "$binary" extract --sword-path "$sword_root" --module "$module" \
         --artifact-chunk-size 4096 > "$first"
     "$binary" extract --sword-path "$sword_root" --module "$module" \
         --artifact-chunk-size 4096 > "$second"
+    "$c_api_driver" extract "$sword_root" "$module" 4096 > "$c_api"
     cmp "$first" "$second"
+    cmp "$first" "$c_api"
     "$python" "$validator" validate "$first" >/dev/null
     "$python" "$validator" reassemble "$first" "$reassembled" >/dev/null
 
@@ -139,6 +145,12 @@ extract_validate_reassemble() {
 while IFS=$'\t' read -r module _driver _classification; do
     extract_validate_reassemble "$module"
 done < <(manifest_rows)
+
+"$c_api_driver" parallel-extract "$sword_root" CorpusRawLD 4096 4 \
+    > "$temporary_directory/parallel.ndjson"
+cmp \
+    "$temporary_directory/CorpusRawLD-1.ndjson" \
+    "$temporary_directory/parallel.ndjson"
 
 grep -F 'CustomExperimentalFeature' "$temporary_directory/CorpusRawLD-1.ndjson" >/dev/null
 grep -F '"type":"config_source"' "$temporary_directory/CorpusRawLD-1.ndjson" >/dev/null

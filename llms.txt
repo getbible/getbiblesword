@@ -1,19 +1,21 @@
 # getBibleSword
 
-> Lossless deterministic extraction of CrossWire SWORD modules through a versioned NDJSON subprocess contract.
+> Lossless deterministic extraction of CrossWire SWORD modules through a standalone CLI or stable C ABI.
 
 ## Identity
 
 - Repository: https://github.com/getbible/getbiblesword
 - Executable: getbiblesword
+- Shared library: libgetbiblesword.so.1
+- Native ABI: 1
 - Independent validator: getbiblesword-v1
 - Product version source: VERSION
 - Current contract: getbiblesword.ndjson/v1
 - Numeric contract version: 1
 - License: GPL-2.0-only
 
-The software release number and contract version are independent. Release 0.2.0
-emits contract v1; it is not schema v2.
+The software release number, native ABI and contract version are independent.
+Release 0.3.0 provides ABI 1 and emits contract v1; it is not schema v2.
 
 ## Safe use
 
@@ -33,6 +35,7 @@ follow artifact symlinks, fetch module URLs or assume redistribution rights.
 - README.md: product status, download, build and quick start
 - docs/README.md: documentation index
 - docs/downstream-integration.md: consumer rules and Bash/Python/Node/PHP examples
+- docs/c-api-v1.md: C functions, callbacks, statuses, packaging and ABI governance
 - docs/contract-v1.md: normative stream semantics and ordering
 - schema/v1/contract.schema.json: per-record JSON Schema
 - docs/validator-v1.md: independent validation and artifact reassembly

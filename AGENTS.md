@@ -15,7 +15,8 @@ project.
 
 ## Current phase
 
-Version `0.2.x` is an engineering preview of the extraction boundary. The full
+Version `0.3.x` is an engineering preview of the CLI and native extraction
+boundaries. The full
 driver conformance corpus and independent validator/reassembler are complete. Do
 not treat it as the final Builder 3 or Study Builder data model until the remaining
 maintainer review is recorded.
@@ -35,10 +36,12 @@ Read these in order when orienting a new project session:
 2. `docs/README.md` for audience-specific documentation paths;
 3. `docs/downstream-integration.md` for consumer rules and examples;
 4. `docs/contract-v1.md` for the normative NDJSON semantics and record order;
-5. `schema/v1/contract.schema.json` for machine validation;
-6. `docs/architecture.md` for component boundaries and design decisions;
-7. `docs/threat-model.md` for trust boundaries and resource hazards;
-8. `docs/milestone-1.md` for phase gates and integration readiness.
+5. `docs/c-api-v1.md` for native ABI, callback, packaging and versioning rules;
+6. `docs/php-extension-roadmap.md` for the future Zend/PIE integration boundary;
+7. `schema/v1/contract.schema.json` for machine validation;
+8. `docs/architecture.md` for component boundaries and design decisions;
+9. `docs/threat-model.md` for trust boundaries and resource hazards;
+10. `docs/milestone-1.md` for phase gates and integration readiness.
 
 Use `docs/schema-review-v1.md` for the final stable-v1 product decision and
 `docs/conformance-corpus.md` for the physical-driver coverage matrix.
@@ -79,6 +82,11 @@ Do not weaken warnings, sanitizers, checksum verification or pinned dependency
 hashes merely to make a build pass. Fix the underlying code or document a narrowly
 scoped toolchain exception.
 
+`GETBIBLESWORD_SWORD_PROVIDER=BUNDLED` is the default. Official builds require the
+exact PIC static SWORD 1.9.0 archive and must not depend on `libsword.so`.
+`GETBIBLESWORD_SWORD_PROVIDER=SYSTEM` is an explicit distribution-maintainer
+choice, never an ambient fallback.
+
 ## CLI integration contract
 
 Always pass an explicit SWORD installation root. Ambient host discovery would make
@@ -107,6 +115,29 @@ Consumer requirements:
 Operational errors are written to standard error. Contract diagnostics remain in
 the NDJSON stream so downstream systems cannot silently lose extraction failures.
 An output path is never overwritten unless `--force` is supplied.
+
+## Native C ABI contract
+
+`libgetbiblesword.so.1` wraps the same `list_modules()` and `extract_module()`
+functions through synchronous C callbacks. It must emit output byte-for-byte equal
+to the CLI for identical inputs. Never expose C++ standard-library objects,
+exceptions, filesystem types or SWORD types in `c_api.h`.
+
+ABI changes must preserve:
+
+- the SONAME and every existing `gbs_*_v1` signature within ABI 1;
+- exact status meanings and callback ownership rules;
+- exception containment at every exported entry point;
+- the exported-symbol allowlist;
+- CLI independence from `libgetbiblesword.so` in every build and from
+  `libsword.so` in bundled official builds;
+- installed CMake and `pkg-config` consumer compatibility; and
+- deterministic serialized SWORD access for concurrent independent read-only
+  calls.
+
+Remote module installation is not part of ABI v1. Do not add implicit network
+access without an explicit policy, CrossWire disclaimer handling, repository
+selection, process-safe locks, atomic installation and dedicated tests.
 
 ## Change rules
 

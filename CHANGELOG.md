@@ -4,6 +4,29 @@ All notable changes are documented here. The project follows Semantic Versioning
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-23
+
+- Add the versioned `libgetbiblesword.so.1` C ABI with callback-streamed module
+  listing and extraction, contained C++ exceptions, explicit status codes and
+  forward-compatible option structures.
+- Keep the existing CLI independently linked and byte-compatible with the C ABI;
+  neither official output depends on a system `libsword.so`, and the CLI does not
+  depend on `libgetbiblesword.so`.
+- Make the pinned PIC static SWORD 1.9.0 engine the default build provider while
+  retaining an explicit system-library mode for distribution maintainers.
+- Install the C header, SONAME links, `pkg-config` metadata and relocatable CMake
+  package metadata for downstream native and PHP extension builds.
+- Add genuine C, C++ exception-containment, repetition, cancellation, failure,
+  installed-consumer, exported-symbol, dependency, concurrency and full
+  conformance parity tests.
+- Serialize in-process SWORD operations for deterministic NTS/ZTS behavior and
+  reject callback re-entry without deadlocking.
+- Package the shared library and development interface in both architecture
+  archives and gate release creation on installed CMake and `pkg-config`
+  consumers.
+- Document the Zend/PIE package boundary and acceptance gates for the planned
+  `getbible/sword` extension without claiming unimplemented direct-query or
+  automatic module-installation behavior.
 - Add concise CI, CodeQL, release, version and license badges.
 - Add download instructions, a documentation index, downstream language examples,
   an AI orientation index and MCP-style subprocess tool descriptors.
