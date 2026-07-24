@@ -18,7 +18,7 @@ jobs:
     if: github.event.repository.private == false
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -28,7 +28,7 @@ jobs:
             pkg-config zlib1g-dev
       - name: Build pinned CrossWire SWORD
         run: ./scripts/build-sword.sh "$PWD/build/dependencies/sword"
-      - uses: github/codeql-action/init@b7351df727350dca84cb9d725d57dcf5bc82ba26 # v3
+      - uses: github/codeql-action/init@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v3
         with:
           languages: c-cpp
       - name: Build getBibleSword
@@ -37,4 +37,4 @@ jobs:
         run: |
           cmake --preset dev
           cmake --build --preset dev --parallel
-      - uses: github/codeql-action/analyze@b7351df727350dca84cb9d725d57dcf5bc82ba26 # v3
+      - uses: github/codeql-action/analyze@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v3
