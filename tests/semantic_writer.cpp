@@ -5,7 +5,6 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <iterator>
 #include <string>
 
 int main(const int argc, char** argv) {
@@ -24,7 +23,16 @@ int main(const int argc, char** argv) {
         if (!stream) {
             return 1;
         }
-        const std::string value((std::istreambuf_iterator<char>(stream)), {});
+        const auto size = std::filesystem::file_size(argv[index]);
+        if (size > 60'000U) {
+            std::cerr << "Fixture exceeds the RawLD record limit.\n";
+            return 1;
+        }
+        std::string value(static_cast<std::size_t>(size), '\0');
+        stream.read(value.data(), static_cast<std::streamsize>(size));
+        if (!stream) {
+            return 1;
+        }
         module.setKey(index == 2 ? "ALPHA" : "BETA");
         module.setEntry(value.data(), static_cast<long>(value.size()));
         if (module.popError() != 0) {
