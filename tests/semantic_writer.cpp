@@ -14,8 +14,15 @@ int main(const int argc, char** argv) {
     }
     const std::filesystem::path output(argv[1]);
     std::filesystem::create_directories(output.parent_path());
-    if (sword::RawLD::createModule(output.c_str()) != 0) {
-        return 1;
+    // SWORD 1.9 RawStr::createModule leaks its temporary filename buffer. Its
+    // only setup work is creating these two empty files. Avoid that unrelated
+    // engine leak without suppressing LeakSanitizer for writer or extractor;
+    // every entry below is still serialized by SWORD's official RawLD writer.
+    for (const auto* extension : {".dat", ".idx"}) {
+        const std::ofstream empty(output.string() + extension, std::ios::binary);
+        if (!empty) {
+            return 1;
+        }
     }
     sword::RawLD module(output.c_str(), "SemanticFixture", "Public-domain semantic fixture");
     for (int index = 2; index < 4; ++index) {
