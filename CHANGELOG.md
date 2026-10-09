@@ -13,6 +13,9 @@ All notable changes are documented here. The project follows Semantic Versioning
   and UTF-16 without substituting damaged source or changing legacy views.
 - Report unsupported/invalid encodings and embedded-NUL stripping limits through
   deterministic diagnostics; retain every raw entry and all physical artifacts.
+- Detect invalid UTF-8 produced by SWORD's strip filters, including non-ASCII
+  punctuation in OSIS divine names. Keep the normalized source intact and mark
+  the faulty stripped projection unavailable instead of publishing corrupt text.
 - Cover real SWORD filter values, subsequent-entry isolation, normalization,
   malformed sequences, repetition, optional-field validation and CLI/C ABI parity.
 - Keep native ABI 1 and the existing authoritative raw-byte boundary unchanged.
