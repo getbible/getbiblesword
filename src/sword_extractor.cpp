@@ -25,6 +25,7 @@
 #include <fstream>
 #include <limits>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -633,6 +634,20 @@ bool emit_entries(
             if (normalized_length) {
                 normalized_stripped = safe_c_string(
                     module.stripText(normalized->data(), *normalized_length));
+                const auto* bytes = reinterpret_cast<const unsigned char*>(
+                    normalized_stripped->data());
+                if (!is_valid_utf8(std::span<const unsigned char>(
+                        bytes, normalized_stripped->size()))) {
+                    // Some SWORD 1.9 filters (notably OSIS divine-name casing)
+                    // can corrupt non-ASCII text even when their input is valid
+                    // UTF-8. Never label that official projection UTF-8 or try
+                    // to repair it by substituting/guessing characters.
+                    normalized_stripped.reset();
+                    emit_diagnostic(
+                        writer, diagnostics, "warning", "entry.normalized_stripped.invalid_utf8",
+                        "SWORD's strip filter produced invalid UTF-8; normalized source markup and legacy projections are retained.",
+                        {{"entry_ordinal", std::to_string(entry_count)}});
+                }
             }
         } else if (normalized) {
             emit_diagnostic(

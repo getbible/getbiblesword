@@ -90,6 +90,12 @@ encodings produce `entry.encoding.unavailable` and `normalized_raw: null`.
 Embedded NUL is retained in `normalized_raw`, but SWORD's string-based stripping
 cannot preserve it, so `normalized_stripped` is null with
 `entry.encoding.embedded_nul`. These warnings do not discard the entry.
+The strip filter's output is validated independently: SWORD 1.9 can corrupt
+Unicode punctuation while uppercasing an OSIS divine name (for example `Lord’s`).
+Such output yields `normalized_stripped: null` and
+`entry.normalized_stripped.invalid_utf8`; consumers can still derive display text
+from the intact `normalized_raw`. The legacy `stripped` field retains the exact
+engine result for inspection.
 
 The logical raw boundary remains SWORD's `getRawEntryBuf()`, not direct physical
 file reads. Some SWORD 1.9.0 drivers prepare text through NUL-terminated routines

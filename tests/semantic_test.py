@@ -38,6 +38,8 @@ text = (
 scsu = text.replace("é", "\xe9").encode("latin-1")
 fixtures = [
     ("UTF8", "UTF-8", text.encode(), text),
+    ("DivineNameUTF8", "UTF-8", (text + '<divineName>Lord’s</divineName>').encode(),
+     text + '<divineName>Lord’s</divineName>'),
     ("Latin1", "Latin-1", text.encode("latin-1"), text),
     ("DefaultLatin1", "", text.encode("latin-1"), text),
     ("SCSU", "SCSU", scsu, text),
@@ -89,8 +91,22 @@ with tempfile.TemporaryDirectory(prefix="getbiblesword-semantics-") as temporary
             assert any(record.get("code") == "entry.encoding.unavailable" for record in records)
         else:
             assert decode(first["normalized_raw"]).decode() == normalized, name
-            assert "café" in decode(first["normalized_stripped"]).decode(), name
-            assert "Footnote body" not in decode(first["normalized_stripped"]).decode(), name
+            if name == "DivineNameUTF8" and first["normalized_stripped"] is None:
+                # Pinned SWORD 1.9 uppercases the UTF-8 bytes of the curly
+                # apostrophe incorrectly. Patched system SWORDs may be correct.
+                assert any(record.get("code") == "entry.normalized_stripped.invalid_utf8"
+                           for record in records), name
+                try:
+                    decode(first["stripped"]).decode("utf-8", errors="strict")
+                except UnicodeDecodeError:
+                    pass
+                else:
+                    raise AssertionError("Expected the preserved SWORD projection to show the defect")
+            else:
+                assert "café" in decode(first["normalized_stripped"]).decode(), name
+                assert "Footnote body" not in decode(first["normalized_stripped"]).decode(), name
+                if name == "DivineNameUTF8":
+                    assert "LORD’S" in decode(first["normalized_stripped"]).decode(), name
             values = attributes(first)
             assert values["Heading"]["Preverse"]["0"] == (
                 b'<title canonical="true">A heading</title>'
