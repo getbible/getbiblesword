@@ -85,6 +85,7 @@ readonly required_installed_files=(
     "$cmake_config_file"
     "$installed_documentation/AGENTS.md"
     "$installed_documentation/README.md"
+    "$installed_documentation/ICU-LICENSE.txt"
     "$installed_documentation/llms.txt"
     "$installed_documentation/docs/c-api-v1.md"
     "$installed_documentation/docs/contract-v1.md"

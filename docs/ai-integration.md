@@ -12,7 +12,7 @@ validation boundary.
 ## Agent facts
 
 - Product and executable: `getBibleSword` / `getbiblesword`.
-- Current release line: `0.3.x` engineering preview.
+- Current release line: `0.4.x` engineering preview.
 - Output contract: `getbiblesword.ndjson/v1`, numeric version `1`.
 - Engine: official CrossWire SWORD, pinned to `1.9.0` in release builds.
 - Transports: local subprocess or `libgetbiblesword.so.1` callback stream.
@@ -24,7 +24,7 @@ validation boundary.
 - Stable success gate: validator exit zero and `footer.success == true`.
 - License: GPL-2.0-only; module content retains its own separate rights.
 
-Do not describe release `0.3.0` as schema v3. The product release, native ABI and
+Do not describe release `0.4.0` as schema v3. The product release, native ABI and
 contract version are separate. Do not transform an export until independent
 validation has completed, and do not invoke these commands through an
 interpolated shell string.

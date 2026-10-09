@@ -15,7 +15,7 @@ project.
 
 ## Current phase
 
-Version `0.3.x` is an engineering preview of the CLI and native extraction
+Version `0.4.x` is an engineering preview of the CLI and native extraction
 boundaries. The full
 driver conformance corpus and independent validator/reassembler are complete. Do
 not treat it as the final Builder 3 or Study Builder data model until the remaining

@@ -5,6 +5,7 @@
 #include "getbiblesword/byte_value.hpp"
 #include "getbiblesword/ndjson_writer.hpp"
 #include "getbiblesword/sha256.hpp"
+#include "getbiblesword/source_encoding.hpp"
 
 #include <array>
 #include <cstdlib>
@@ -64,6 +65,30 @@ void test_utf8_and_json() {
     expect(binary.find("\"utf8\"") == std::string::npos, "invalid UTF-8 has no projection");
 }
 
+void test_source_encoding() {
+    using getbiblesword::source_utf8;
+    expect(source_utf8("<p>caf\xe9</p>", "Latin-1") == "<p>caf\xc3\xa9</p>",
+        "Latin-1 source markup converted without losing tags");
+    expect(source_utf8("caf\xe9", "") == "caf\xc3\xa9", "missing encoding is Latin-1");
+    expect(source_utf8("\xce\xb1", "UTF-8") == "\xce\xb1", "UTF-8 preserved");
+    expect(!source_utf8("\xc0\xaf", "UTF-8"), "invalid UTF-8 rejected");
+    expect(!source_utf8("valid ASCII", "unknown"), "unknown encoding not guessed");
+    expect(source_utf8(std::string_view("\xff\xfe\x3d\xd8\x00\xde", 6), "UTF-16")
+        == "\xf0\x9f\x98\x80", "UTF-16 supplementary pair preserved");
+    expect(source_utf8(std::string_view("\xfe\xff\x03\xb1", 4), "UTF-16") == "\xce\xb1",
+        "UTF-16 big endian BOM respected");
+    expect(source_utf8(std::string_view("A\0", 2), "UTF-16") == "A",
+        "BOM-less UTF-16 uses stable little endian");
+    expect(!source_utf8(std::string_view("\x3d\xd8", 2), "UTF-16"),
+        "unpaired UTF-16 surrogate rejected");
+    expect(!source_utf8("a", "UTF-16"), "odd UTF-16 length rejected");
+    expect(source_utf8("caf\xe9", "SCSU") == "caf\xc3\xa9", "SCSU initial Latin window");
+    expect(source_utf8("\x0e\x03\xb1", "SCSU") == "\xce\xb1", "SCSU unicode quote");
+    expect(!source_utf8("\x0e\x03", "SCSU"), "truncated SCSU command rejected");
+    expect(source_utf8(std::string_view("a\0b", 3), "UTF-8") == std::string("a\0b", 3),
+        "normalization retains embedded NUL");
+}
+
 void test_annotation_round_trip() {
     const std::string raw = "word <w lemma=\"strong:G3056\">logos</w> &amp; <future x='>'/>";
     const auto segments = getbiblesword::segment_annotations(raw);
@@ -99,6 +124,7 @@ int main() {
     test_sha256();
     test_base64();
     test_utf8_and_json();
+    test_source_encoding();
     test_annotation_round_trip();
     test_ndjson_determinism();
     if (failures != 0) {
