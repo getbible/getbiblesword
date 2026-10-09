@@ -66,9 +66,36 @@ Each logical entry contains:
 - `stripped`: result of `SWModule::stripText()`;
 - `official_attributes`: the complete three-level ordered map produced after
   `setProcessEntryAttributes(true)` and rendering;
+- `normalized_raw` (optional): source markup decoded strictly to UTF-8 using the
+  declared `Encoding`, or `null` when decoding is unavailable. It does not apply
+  markup filters, Unicode normalization, replacement characters or inferred
+  encodings. Missing `Encoding` follows SWORD's Latin-1 default;
+- `normalized_stripped` (optional): SWORD's `stripText()` projection of
+  `normalized_raw`, or `null` when normalization or safe stripping is unavailable;
 - `annotation_segments`: a lossless lexical segmentation of raw markup. Segments
   not projected into official attributes remain explicitly present as
   `uninterpreted`; getBibleSword never invents a SWORD interpretation.
+
+Current-entry rendering populates `official_attributes`; the extractor copies
+`raw` before rendering and snapshots attributes before stripping. Supplied-buffer
+rendering disables SWORD attribute processing and must not be used to collect
+those attributes. All legacy fields retain their existing meanings and encoding.
+Consumers parsing source markup should prefer the optional UTF-8 fields while
+retaining `raw` and artifacts for exact preservation.
+
+The normalized projections support UTF-8, Latin-1, SCSU and UTF-16 through strict
+ICU decoding. UTF-16 honors a byte-order mark; without one its defined byte order
+is little-endian, independent of the host. Invalid byte sequences or unsupported
+encodings produce `entry.encoding.unavailable` and `normalized_raw: null`.
+Embedded NUL is retained in `normalized_raw`, but SWORD's string-based stripping
+cannot preserve it, so `normalized_stripped` is null with
+`entry.encoding.embedded_nul`. These warnings do not discard the entry.
+
+The logical raw boundary remains SWORD's `getRawEntryBuf()`, not direct physical
+file reads. Some SWORD 1.9.0 drivers prepare text through NUL-terminated routines
+and may truncate UTF-16 before this boundary. Normalization cannot restore bytes
+already withheld by the engine; invalid surviving UTF-16 produces the diagnostic
+above. Full artifact capture remains the exact physical-file recovery path.
 
 Verse-key modules enable introductions before traversal, matching CrossWire's own
 `mod2imp` exporter. Generic traversal is used for all official module drivers so

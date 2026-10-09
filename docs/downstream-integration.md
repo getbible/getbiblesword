@@ -10,7 +10,7 @@ installation, validate the resulting NDJSON, and then transform validated record
 in a separate adapter owned by the consuming project.
 
 The product version, native ABI and protocol version are independent. Release
-`0.3.0` provides native ABI 1 and emits contract `getbiblesword.ndjson/v1` with
+`0.4.0` provides native ABI 1 and emits contract `getbiblesword.ndjson/v1` with
 numeric `contract_version: 1`. Consumers must inspect the stream header instead
 of inferring compatibility from the binary, library or archive version.
 
@@ -73,6 +73,14 @@ Decode `base64`, verify `size` and `sha256`, and treat those decoded bytes as th
 value. `utf8` is present only when the bytes have an exact safe UTF-8 projection.
 Never substitute `utf8`, `rendered_default` or `stripped` for authoritative raw
 bytes.
+
+For semantic parsing, prefer optional `entry.normalized_raw` and
+`entry.normalized_stripped`, introduced in product 0.4.0. They hold strict UTF-8
+source markup and its SWORD plain-text projection without changing the legacy
+views. Validate their byte envelopes as usual, handle null or absent values, and
+retain encoding diagnostics. Do not apply the module's original encoding to these
+already-decoded fields. Unknown or malformed encodings remain visible with their
+original raw bytes and physical artifacts.
 
 ## Acceptance rules
 

@@ -87,6 +87,14 @@
           "properties": {
             "type": { "const": "entry" },
             "key": { "$ref": "#/$defs/byteValue" },
+            "normalized_raw": {
+              "description": "Optional UTF-8 source markup projection; null when the declared encoding cannot be decoded strictly. Never replaces authoritative raw bytes.",
+              "oneOf": [{ "$ref": "#/$defs/byteValue" }, { "type": "null" }]
+            },
+            "normalized_stripped": {
+              "description": "Optional SWORD stripText projection of normalized_raw, encoded in UTF-8; null when unavailable.",
+              "oneOf": [{ "$ref": "#/$defs/byteValue" }, { "type": "null" }]
+            },
             "raw": { "$ref": "#/$defs/byteValue" }
           }
         }

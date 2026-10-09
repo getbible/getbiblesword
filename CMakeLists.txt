@@ -49,6 +49,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(GetBibleSwordWarnings)
 
 find_package(PkgConfig 1.8 REQUIRED)
+find_package(ICU REQUIRED COMPONENTS uc)
 if(GETBIBLESWORD_SWORD_PROVIDER STREQUAL "BUNDLED")
   pkg_check_modules(SWORD REQUIRED "sword=1.9.0")
   find_file(
@@ -107,6 +108,26 @@ else()
 endif()
 add_library(getbiblesword::sword-engine ALIAS getbiblesword_sword_engine)
 
+add_library(getbiblesword_icu INTERFACE)
+if(GETBIBLESWORD_SWORD_PROVIDER STREQUAL "BUNDLED")
+  # Official binary consumers must not acquire a host-specific ICU .so dependency
+  # merely to decode source text. Distribution ICU archives are not necessarily
+  # PIC, so only the standalone CLI uses this target; the C ABI uses ICU::uc.
+  pkg_check_modules(ICU_UC REQUIRED icu-uc)
+  find_file(GETBIBLESWORD_ICU_UC_ARCHIVE NAMES libicuuc.a
+    PATHS ${ICU_UC_STATIC_LIBRARY_DIRS} NO_DEFAULT_PATH REQUIRED)
+  find_file(GETBIBLESWORD_ICU_DATA_ARCHIVE NAMES libicudata.a
+    PATHS ${ICU_UC_STATIC_LIBRARY_DIRS} NO_DEFAULT_PATH REQUIRED)
+  set(GETBIBLESWORD_ICU_SYSTEM_DEPENDENCIES ${ICU_UC_STATIC_LIBRARIES})
+  list(REMOVE_ITEM GETBIBLESWORD_ICU_SYSTEM_DEPENDENCIES icuuc icudata)
+  target_include_directories(getbiblesword_icu SYSTEM INTERFACE ${ICU_INCLUDE_DIRS})
+  target_link_libraries(getbiblesword_icu INTERFACE
+    ${GETBIBLESWORD_ICU_UC_ARCHIVE} ${GETBIBLESWORD_ICU_DATA_ARCHIVE}
+    ${GETBIBLESWORD_ICU_SYSTEM_DEPENDENCIES})
+else()
+  target_link_libraries(getbiblesword_icu INTERFACE ICU::uc)
+endif()
+
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/include/getbiblesword/version.hpp.in"
   "${CMAKE_CURRENT_BINARY_DIR}/generated/getbiblesword/version.hpp"
@@ -117,10 +138,12 @@ add_library(getbiblesword_core STATIC
   src/annotation.cpp
   src/base64.cpp
   src/byte_value.cpp
+  src/source_encoding.cpp
   src/ndjson_writer.cpp
   src/sha256.cpp
 )
 add_library(getbiblesword::core ALIAS getbiblesword_core)
+target_include_directories(getbiblesword_core SYSTEM PRIVATE ${ICU_INCLUDE_DIRS})
 target_compile_features(getbiblesword_core PUBLIC cxx_std_20)
 set_target_properties(getbiblesword_core PROPERTIES
   POSITION_INDEPENDENT_CODE ON
@@ -168,6 +191,8 @@ target_link_libraries(
   getbiblesword
   PRIVATE
     getbiblesword::sword
+    getbiblesword::core
+    getbiblesword_icu
     getbiblesword::sword-engine
 )
 getbiblesword_set_warnings(getbiblesword)
@@ -193,7 +218,7 @@ if(GETBIBLESWORD_BUILD_SHARED_LIBRARY)
     PRIVATE
       "${CMAKE_CURRENT_BINARY_DIR}/generated"
   )
-  target_link_libraries(getbiblesword_shared PRIVATE getbiblesword::sword)
+  target_link_libraries(getbiblesword_shared PRIVATE getbiblesword::sword getbiblesword::core ICU::uc)
   set_target_properties(getbiblesword_shared PROPERTIES
     OUTPUT_NAME getbiblesword
     EXPORT_NAME getBibleSword
@@ -264,7 +289,7 @@ install(
   RENAME getbiblesword-v1
 )
 install(
-  FILES AGENTS.md LICENSE README.md SECURITY.md llms.txt
+  FILES AGENTS.md LICENSE ICU-LICENSE.txt README.md SECURITY.md llms.txt
   DESTINATION "${CMAKE_INSTALL_DOCDIR}"
 )
 install(DIRECTORY docs schema DESTINATION "${CMAKE_INSTALL_DOCDIR}")
@@ -284,7 +309,7 @@ if(BUILD_TESTING)
   find_package(Python3 3.9 REQUIRED COMPONENTS Interpreter)
   add_executable(getbiblesword_tests tests/test_main.cpp)
   target_compile_features(getbiblesword_tests PRIVATE cxx_std_20)
-  target_link_libraries(getbiblesword_tests PRIVATE getbiblesword::core)
+  target_link_libraries(getbiblesword_tests PRIVATE getbiblesword::core ICU::uc)
   getbiblesword_set_warnings(getbiblesword_tests)
   getbiblesword_enable_sanitizers(getbiblesword_tests)
   add_test(NAME getbiblesword.unit COMMAND getbiblesword_tests)
@@ -295,6 +320,20 @@ if(BUILD_TESTING)
   add_test(
     NAME getbiblesword.validator-unit
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/validator_test.py"
+  )
+
+  add_executable(getbiblesword_semantic_writer tests/semantic_writer.cpp)
+  target_compile_features(getbiblesword_semantic_writer PRIVATE cxx_std_20)
+  target_include_directories(getbiblesword_semantic_writer SYSTEM PRIVATE ${SWORD_INCLUDE_DIRS})
+  target_link_libraries(getbiblesword_semantic_writer PRIVATE getbiblesword::sword-engine)
+  getbiblesword_set_warnings(getbiblesword_semantic_writer)
+  getbiblesword_enable_sanitizers(getbiblesword_semantic_writer)
+  add_test(
+    NAME getbiblesword.semantic-extraction
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/semantic_test.py"
+      "$<TARGET_FILE:getbiblesword>" "$<TARGET_FILE:getbiblesword_semantic_writer>"
+      "${CMAKE_CURRENT_SOURCE_DIR}/tools/getbiblesword_v1.py"
+      "$<$<BOOL:${GETBIBLESWORD_BUILD_SHARED_LIBRARY}>:$<TARGET_FILE:getbiblesword_c_api_driver>>"
   )
 
   if(GETBIBLESWORD_BUILD_SHARED_LIBRARY)

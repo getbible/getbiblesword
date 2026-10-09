@@ -503,6 +503,15 @@ class Validator:
             fail(f"entry.ordinal is {ordinal}, expected {self.entry_count}", line=line)
         decode_byte_value(record["key"], "entry.key", line)
         raw = decode_byte_value(record["raw"], "entry.raw", line)
+        for name in ("normalized_raw", "normalized_stripped"):
+            if record.get(name) is not None:
+                normalized = decode_byte_value(record[name], f"entry.{name}", line)
+                try:
+                    normalized.decode("utf-8", errors="strict")
+                except UnicodeDecodeError:
+                    fail(f"entry.{name} must contain valid UTF-8", line=line)
+        if record.get("normalized_stripped") is not None and record.get("normalized_raw") is None:
+            fail("entry.normalized_stripped requires normalized_raw", line=line)
         projections = require_boolean(
             record["projections_available"], "entry.projections_available", line
         )

@@ -28,7 +28,7 @@ Linux distributions may place the library and metadata below a multiarch
 directory such as `lib/x86_64-linux-gnu`.
 
 The ELF SONAME is `libgetbiblesword.so.1`. The product version and ABI version are
-independent. Product `0.3.0` provides ABI version `1` and still emits NDJSON
+independent. Product `0.4.0` provides ABI version `1` and still emits NDJSON
 contract v1.
 
 ## Building
@@ -62,6 +62,12 @@ cmake \
 Official release artifacts never depend on `libsword.so`. The standalone
 `getbiblesword` executable also never depends on `libgetbiblesword.so`; downstream
 systems that extract only `/usr/bin/getbiblesword` remain supported.
+
+Source-encoding normalization uses ICU. The standalone bundled CLI embeds its
+static archives; `libgetbiblesword.so.1` requires the distribution ICU runtime
+(`libicu74` for Ubuntu 24.04 release builds), because the distribution static
+archives are not position-independent. Install the matching runtime when using
+the native library. This does not alter C ABI 1 or the CLI installation contract.
 
 ## Complete C example
 

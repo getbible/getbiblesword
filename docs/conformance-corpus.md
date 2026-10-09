@@ -68,3 +68,12 @@ ctest --test-dir build/conformance --output-on-failure
 CI has a dedicated conformance job. Release builds also enable the suite, making
 all-driver compatibility and artifact reversibility release gates rather than
 occasional developer checks.
+
+The default test suite additionally creates small modules through SWORD's native
+RawLD writer and verifies actual heading, footnote and lexical attribute values,
+attribute isolation between entries, strict UTF-8/Latin-1/SCSU normalization,
+invalid and unknown encoding diagnostics, byte-identical repeated exports and
+CLI/C ABI parity. Unit coverage checks UTF-16 byte orders, supplementary pairs,
+unpaired surrogates and incomplete SCSU commands. These tests validate content
+meaning as well as stream framing; all-driver artifact tests alone would not
+detect missing official attributes.

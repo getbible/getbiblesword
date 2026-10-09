@@ -85,7 +85,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes \
-            binutils build-essential cmake libsword-dev ninja-build pkg-config
+            binutils build-essential cmake libicu-dev libsword-dev ninja-build pkg-config
       - name: Configure system-provider build
         run: |
           cmake \

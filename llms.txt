@@ -15,7 +15,7 @@
 - License: GPL-2.0-only
 
 The software release number, native ABI and contract version are independent.
-Release 0.3.0 provides ABI 1 and emits contract v1; it is not schema v2.
+Release 0.4.0 provides ABI 1 and emits contract v1; it is not schema v2.
 
 ## Safe use
 

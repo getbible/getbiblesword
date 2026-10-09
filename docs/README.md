@@ -53,7 +53,7 @@ operations.
 
 `VERSION` identifies the software release. The first `header` record identifies
 the output contract. The ELF SONAME identifies the native ABI. These values are
-independent: release `0.3.0` provides `libgetbiblesword.so.1` and emits
+independent: release `0.4.0` provides `libgetbiblesword.so.1` and emits
 `getbiblesword.ndjson/v1` with `contract_version: 1`.
 
 Breaking contract changes require a new identifier and schema directory. Additive

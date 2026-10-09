@@ -105,6 +105,31 @@ class ValidatorTests(unittest.TestCase):
     def validate(self, stream: bytes):
         return TOOL.Validator(TOOL.DEFAULT_MAX_RECORD_BYTES).validate(io.BytesIO(stream))
 
+    def test_optional_normalized_projections_are_validated(self) -> None:
+        entry = {
+            "sequence": 2, "type": "entry", "ordinal": 0,
+            "key": byte_value(b"ALPHA"), "raw": byte_value(b""),
+            "scope": {"type": "sword_key", "index": 0},
+            "annotation_segments": [], "official_attributes": [],
+            "projections_available": True,
+            "rendered_default": byte_value(b""), "stripped": byte_value(b""),
+        }
+        # Old v1 streams remain valid without either additive field.
+        self.validate(build_stream("extract", [module_record(), entry]))
+        for name in ("normalized_raw", "normalized_stripped"):
+            entry[name] = byte_value(b"valid UTF-8")
+        self.validate(build_stream("extract", [module_record(), entry]))
+        for name in ("normalized_raw", "normalized_stripped"):
+            with self.subTest(field=name):
+                invalid = dict(entry, **{name: byte_value(b"\xff")})
+                with self.assertRaisesRegex(TOOL.ContractError, f"{name}.*UTF-8"):
+                    self.validate(build_stream("extract", [module_record(), invalid]))
+        entry["normalized_raw"] = None
+        with self.assertRaisesRegex(TOOL.ContractError, "requires normalized_raw"):
+            self.validate(build_stream("extract", [module_record(), entry]))
+        entry["normalized_stripped"] = None
+        self.validate(build_stream("extract", [module_record(), entry]))
+
     def test_accepts_minimal_list_stream(self) -> None:
         summary = self.validate(build_stream("list", []))
         self.assertEqual(summary.command, "list")

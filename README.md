@@ -17,7 +17,7 @@ kept alongside the exact source bytes; rendered text never replaces source data.
 
 ## Status
 
-The current `0.3.x` line is an engineering preview. Its all-driver conformance
+The current `0.4.x` line is an engineering preview. Its all-driver conformance
 suite, independent validator and byte-for-byte artifact round trip are complete.
 The final maintainer review of the public contract and classification policy is
 still required before the project is declared stable `1.0.0`.
@@ -26,7 +26,7 @@ The software release and output contract have separate versions:
 
 | Item | Current value | Meaning |
 |---|---|---|
-| Product release | `0.3.0` | Version of the executable, shared library and release archive |
+| Product release | `0.4.0` | Version of the executable, shared library and release archive |
 | Native ABI | `1` / `libgetbiblesword.so.1` | Stable C calling boundary for native and PHP extensions |
 | NDJSON contract | `getbiblesword.ndjson/v1` | Compatibility identifier consumers must check |
 | Contract version | `1` | Numeric value in each stream header |
@@ -61,7 +61,11 @@ install it with the package/deployment method appropriate for the target system.
 
 ## Build
 
-Dependencies are C and C++20 compilers, CMake 3.25+, Ninja and pkg-config.
+Dependencies are C and C++20 compilers, CMake 3.25+, Ninja, pkg-config and the
+ICU development library (`libicu-dev` on Ubuntu). The official standalone CLI
+links ICU's static archives, so its new UTF-8 projections add no ICU runtime
+dependency. The native C ABI library and explicit system-provider builds use the
+distribution's shared ICU runtime (`libicu74` on Ubuntu 24.04).
 Official builds use the pinned CrossWire SWORD 1.9.0 PIC static archive.
 
 ```sh

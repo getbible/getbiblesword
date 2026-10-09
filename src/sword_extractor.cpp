@@ -606,11 +606,7 @@ bool emit_entries(
         std::string attributes = "[]";
         bool projections_available = false;
         if (length) {
-            // A supplied buffer disables SWORD's entry-attribute collection.
-            // Render the current entry after copying its unmodified bytes, then
-            // snapshot attributes before any subsequent projection can mutate
-            // SWORD's shared entry state.
-            const auto rendered_buffer = module.renderText();
+            const auto rendered_buffer = module.renderText(raw.data(), *length, true);
             rendered = swbuf_bytes(rendered_buffer);
             attributes = official_attributes_json(module.getEntryAttributes());
             stripped = safe_c_string(module.stripText(raw.data(), *length));

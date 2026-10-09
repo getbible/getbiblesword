@@ -4,6 +4,19 @@ All notable changes are documented here. The project follows Semantic Versioning
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-09
+
+- Populate SWORD's current-entry heading, footnote and lexical attributes before
+  snapshotting them, while retaining raw bytes before filters mutate the entry.
+- Add optional `normalized_raw` and `normalized_stripped` UTF-8 byte envelopes
+  within NDJSON v1. Strict ICU decoding supports declared UTF-8, Latin-1, SCSU
+  and UTF-16 without substituting damaged source or changing legacy views.
+- Report unsupported/invalid encodings and embedded-NUL stripping limits through
+  deterministic diagnostics; retain every raw entry and all physical artifacts.
+- Cover real SWORD filter values, subsequent-entry isolation, normalization,
+  malformed sequences, repetition, optional-field validation and CLI/C ABI parity.
+- Keep native ABI 1 and the existing authoritative raw-byte boundary unchanged.
+
 ## [0.3.0] - 2026-07-23
 
 - Add the versioned `libgetbiblesword.so.1` C ABI with callback-streamed module
