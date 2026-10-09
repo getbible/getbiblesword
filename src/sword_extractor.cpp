@@ -5,6 +5,7 @@
 #include "getbiblesword/annotation.hpp"
 #include "getbiblesword/artifact.hpp"
 #include "getbiblesword/byte_value.hpp"
+#include "getbiblesword/source_encoding.hpp"
 #include "getbiblesword/version.hpp"
 
 #include <swbuf.h>
@@ -600,22 +601,51 @@ bool emit_entries(
             return false;
         }
         const auto length = sword_length(raw.size(), writer, diagnostics, entry_count);
+        const auto encoding = safe_c_string(module.getConfigEntry("Encoding"));
+        const auto normalized = source_utf8(raw, encoding);
+        if (!normalized) {
+            emit_diagnostic(
+                writer, diagnostics, "warning", "entry.encoding.unavailable",
+                "The declared source encoding is unsupported or its bytes are invalid; raw bytes are retained.",
+                {{"entry_ordinal", std::to_string(entry_count)},
+                 {"encoding", byte_value_json(encoding)}});
+        }
 
         std::string rendered;
         std::string stripped;
         std::string attributes = "[]";
+        std::optional<std::string> normalized_stripped;
         bool projections_available = false;
         if (length) {
-            const auto rendered_buffer = module.renderText(raw.data(), *length, true);
+            // A supplied buffer disables SWORD's entry-attribute collection.
+            // Render the current entry after copying its unmodified bytes, then
+            // snapshot attributes before any subsequent projection can mutate
+            // SWORD's shared entry state.
+            const auto rendered_buffer = module.renderText();
             rendered = swbuf_bytes(rendered_buffer);
             attributes = official_attributes_json(module.getEntryAttributes());
             stripped = safe_c_string(module.stripText(raw.data(), *length));
             projections_available = true;
         }
+        if (normalized && normalized->find('\0') == std::string::npos) {
+            const auto normalized_length = sword_length(
+                normalized->size(), writer, diagnostics, entry_count);
+            if (normalized_length) {
+                normalized_stripped = safe_c_string(
+                    module.stripText(normalized->data(), *normalized_length));
+            }
+        } else if (normalized) {
+            emit_diagnostic(
+                writer, diagnostics, "warning", "entry.encoding.embedded_nul",
+                "UTF-8 source contains an embedded NUL; SWORD's string-based strip projection is unavailable.",
+                {{"entry_ordinal", std::to_string(entry_count)}});
+        }
 
         writer.emit("entry", {
             {"annotation_segments", annotation_segments_json(raw)},
             {"key", byte_value_json(key)},
+            {"normalized_raw", normalized ? byte_value_json(*normalized) : "null"},
+            {"normalized_stripped", normalized_stripped ? byte_value_json(*normalized_stripped) : "null"},
             {"official_attributes", std::move(attributes)},
             {"ordinal", std::to_string(entry_count)},
             {"projections_available", projections_available ? "true" : "false"},
