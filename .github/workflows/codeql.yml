@@ -28,7 +28,7 @@ jobs:
             pkg-config zlib1g-dev
       - name: Build pinned CrossWire SWORD
         run: ./scripts/build-sword.sh "$PWD/build/dependencies/sword"
-      - uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v3
+      - uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v3
         with:
           languages: c-cpp
       - name: Build getBibleSword
@@ -37,4 +37,4 @@ jobs:
         run: |
           cmake --preset dev
           cmake --build --preset dev --parallel
-      - uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v3
+      - uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v3
